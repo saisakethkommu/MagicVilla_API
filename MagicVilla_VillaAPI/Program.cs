@@ -1,5 +1,7 @@
+using MagicVilla_VillaAPI.Data;
 using MagicVilla_VillaAPI.Interfaces;
 using MagicVilla_VillaAPI.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args); // logger is registered inside the application with this createbuilder function and can be utilized in dependency injection whereever we want to use logging
@@ -17,6 +19,10 @@ var builder = WebApplication.CreateBuilder(args); // logger is registered inside
 
 /*builder.Host.UseSerilog();*/
 
+builder.Services.AddDbContext<ApplicationDbContext>(options => {
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
+});
+
 builder.Services.AddControllers(
     option =>
     { //option.ReturnHttpNotAcceptable = true }
@@ -27,6 +33,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ILogging, Logging>(); // register the service in the container
 // there are multiple lifetimes when registering a service longest is singleton cretad when the application starts and that object is used everytime an application requests for its implementation, scoped is for eveery request it will create a new object and provider it, transient does it on every time the object is object example if in a request an object is used 10 times it gets created 10 times
+builder.Services.AddAutoMapper(typeof(MagicVilla_VillaAPI.MappingConfig));
 
 var app = builder.Build();
 
